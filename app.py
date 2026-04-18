@@ -168,28 +168,33 @@ def index():
 @app.route('/generate', methods=['POST'])
 def generate():
     """Generate content endpoint"""
-    data = request.json
-    topic = data.get('topic', 'AI automation for businesses')
-    
-    # Generate script
-    script_result = generate_script(topic)
-    if 'error' in script_result:
-        return jsonify(script_result), 500
-    
-    # Generate hooks
-    hooks_result = generate_hooks(topic, script_result['script'])
-    if 'error' in hooks_result:
-        return jsonify(hooks_result), 500
-    
-    # Return results (no file saving)
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    
-    return jsonify({
-        'topic': topic,
-        'script': script_result['script'],
-        'hooks': hooks_result['hooks'],
-        'timestamp': timestamp
-    })
+    try:
+        data = request.json
+        topic = data.get('topic', 'AI automation for businesses')
+        
+        # Generate script
+        script_result = generate_script(topic)
+        if 'error' in script_result:
+            return jsonify(script_result), 500
+        
+        # Generate hooks
+        hooks_result = generate_hooks(topic, script_result['script'])
+        if 'error' in hooks_result:
+            return jsonify(hooks_result), 500
+        
+        # Return results (no file saving)
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        return jsonify({
+            'topic': topic,
+            'script': script_result['script'],
+            'hooks': hooks_result['hooks'],
+            'timestamp': timestamp
+        })
+    except Exception as e:
+        return jsonify({
+            'error': f'Server error: {str(e)}'
+        }), 500
 
 @app.route('/health')
 def health():

@@ -5,6 +5,41 @@ const topicInput = document.getElementById('topic');
 const resultsSection = document.getElementById('results');
 const errorBox = document.getElementById('error');
 const loadingProgress = document.getElementById('loadingProgress');
+const themeToggle = document.getElementById('themeToggle');
+
+// Theme Toggle
+themeToggle.addEventListener('click', () => {
+    const body = document.body;
+    const icon = themeToggle.querySelector('i');
+    
+    if (body.classList.contains('light-theme')) {
+        body.classList.remove('light-theme');
+        body.classList.add('dark-theme');
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+        localStorage.setItem('theme', 'dark');
+    } else {
+        body.classList.remove('dark-theme');
+        body.classList.add('light-theme');
+        icon.classList.remove('fa-sun');
+        icon.classList.add('fa-moon');
+        localStorage.setItem('theme', 'light');
+    }
+});
+
+// Load saved theme
+window.addEventListener('load', () => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    const body = document.body;
+    const icon = themeToggle.querySelector('i');
+    
+    if (savedTheme === 'dark') {
+        body.classList.remove('light-theme');
+        body.classList.add('dark-theme');
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+    }
+});
 
 // Generate content on button click
 generateBtn.addEventListener('click', generateContent);
@@ -29,11 +64,14 @@ async function generateContent() {
     errorBox.style.display = 'none';
     
     // Show loading progress
-    loadingProgress.style.display = 'grid';
+    loadingProgress.style.display = 'block';
     generateBtn.disabled = true;
     
-    // Animate progress steps
-    await animateProgress();
+    // Reset all cards
+    resetCards();
+    
+    // Animate cards sequentially
+    animateCards();
     
     try {
         const response = await fetch('/generate', {
@@ -50,11 +88,8 @@ async function generateContent() {
         
         const data = await response.json();
         
-        // Complete all steps
-        completeAllSteps();
-        
-        // Wait a bit before showing results
-        await sleep(500);
+        // Wait for all cards to complete
+        await sleep(8000);
         
         // Display results
         displayResults(data);
@@ -68,31 +103,30 @@ async function generateContent() {
     }
 }
 
-async function animateProgress() {
-    const steps = ['step1', 'step2', 'step3', 'step4'];
-    
-    for (let i = 0; i < steps.length; i++) {
-        const step = document.getElementById(steps[i]);
-        step.classList.add('active');
-        
-        // Simulate processing time
-        await sleep(i === 0 ? 500 : 1000);
-        
-        // Mark as completed
-        step.classList.remove('active');
-        step.classList.add('completed');
-        step.querySelector('.progress-status').textContent = '✅';
+function resetCards() {
+    for (let i = 1; i <= 4; i++) {
+        const card = document.getElementById(`card${i}`);
+        card.classList.remove('active', 'flipped');
     }
 }
 
-function completeAllSteps() {
-    const steps = ['step1', 'step2', 'step3', 'step4'];
-    steps.forEach(stepId => {
-        const step = document.getElementById(stepId);
-        step.classList.remove('active');
-        step.classList.add('completed');
-        step.querySelector('.progress-status').textContent = '✅';
-    });
+async function animateCards() {
+    for (let i = 1; i <= 4; i++) {
+        const card = document.getElementById(`card${i}`);
+        
+        // Activate card
+        card.classList.add('active');
+        
+        // Wait for processing
+        await sleep(1500);
+        
+        // Flip card to show completion
+        card.classList.remove('active');
+        card.classList.add('flipped');
+        
+        // Small delay before next card
+        await sleep(500);
+    }
 }
 
 function displayResults(data) {
@@ -110,14 +144,14 @@ function displayResults(data) {
     
     // Display timestamp
     document.getElementById('timestamp').textContent = 
-        `✅ Generated at: ${new Date().toLocaleString()}`;
+        `Generated at ${new Date().toLocaleString()}`;
     
     // Scroll to results
     resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function showError(message) {
-    errorBox.textContent = '❌ ' + message;
+    errorBox.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + message;
     errorBox.style.display = 'block';
     
     // Hide error after 5 seconds
@@ -134,12 +168,14 @@ function copyToClipboard(elementId) {
         // Show success feedback
         const btn = event.target.closest('.copy-btn');
         const originalHTML = btn.innerHTML;
-        btn.innerHTML = '<span class="copy-icon">✓</span> Copied!';
-        btn.style.background = 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)';
+        btn.innerHTML = '<i class="fas fa-check"></i>';
+        btn.style.background = 'rgba(76, 175, 80, 0.3)';
+        btn.style.borderColor = '#4caf50';
         
         setTimeout(() => {
             btn.innerHTML = originalHTML;
-            btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            btn.style.background = 'rgba(255, 255, 255, 0.1)';
+            btn.style.borderColor = 'rgba(255, 255, 255, 0.2)';
         }, 2000);
     }).catch(err => {
         showError('Failed to copy to clipboard');
@@ -148,13 +184,8 @@ function copyToClipboard(elementId) {
 }
 
 function resetForm() {
-    // Reset progress cards
-    const steps = ['step1', 'step2', 'step3', 'step4'];
-    steps.forEach(stepId => {
-        const step = document.getElementById(stepId);
-        step.classList.remove('active', 'completed');
-        step.querySelector('.progress-status').textContent = '⏳';
-    });
+    // Reset cards
+    resetCards();
     
     // Hide results
     resultsSection.style.display = 'none';

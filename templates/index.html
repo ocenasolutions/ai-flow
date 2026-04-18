@@ -4,113 +4,188 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Content Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
+<body class="light-theme">
+    <div class="background-animation">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- Theme Switcher -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <i class="fas fa-moon"></i>
+    </button>
+
     <div class="container">
         <header>
-            <div class="logo">✨</div>
+            <div class="logo-container">
+                <i class="fas fa-wand-magic-sparkles logo-icon"></i>
+                <div class="logo-glow"></div>
+            </div>
             <h1>AI Content Generator</h1>
-            <p class="subtitle">Generate viral scripts & hooks in seconds</p>
+            <p class="subtitle">Transform ideas into viral content instantly</p>
         </header>
 
-        <div class="input-section">
-            <div class="input-group">
-                <label for="topic">What's your topic?</label>
+        <div class="input-section glass-card">
+            <div class="input-wrapper">
+                <i class="fas fa-lightbulb input-icon"></i>
                 <input 
                     type="text" 
                     id="topic" 
-                    placeholder="e.g., AI automation for small businesses"
+                    placeholder="What's your content about?"
                     value="AI automation for small businesses"
                 >
             </div>
             
             <button id="generateBtn" class="generate-btn">
-                <span class="btn-icon">🚀</span>
-                <span class="btn-text">Generate Content</span>
+                <span class="btn-gradient"></span>
+                <span class="btn-content">
+                    <i class="fas fa-rocket"></i>
+                    <span class="btn-text">Generate Magic</span>
+                </span>
             </button>
         </div>
 
-        <!-- Loading Progress Cards -->
-        <div id="loadingProgress" class="loading-progress" style="display: none;">
-            <div class="progress-card" id="step1">
-                <div class="progress-icon">🔍</div>
-                <div class="progress-content">
-                    <h3>Analyzing Topic</h3>
-                    <p>Understanding your content requirements...</p>
+        <!-- Animated Process Cards -->
+        <div id="loadingProgress" class="loading-container" style="display: none;">
+            <div class="process-cards">
+                <div class="process-card" id="card1">
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="card-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h3>Analyzing</h3>
+                            <p>Understanding your topic</p>
+                            <div class="card-number">01</div>
+                        </div>
+                        <div class="card-back">
+                            <div class="card-icon success">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h3>Complete</h3>
+                            <p>Topic analyzed</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="progress-status">⏳</div>
-            </div>
 
-            <div class="progress-card" id="step2">
-                <div class="progress-icon">✍️</div>
-                <div class="progress-content">
-                    <h3>Writing Script</h3>
-                    <p>Crafting your script in Hinglish voice...</p>
+                <div class="process-card" id="card2">
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="card-icon">
+                                <i class="fas fa-pen-fancy"></i>
+                            </div>
+                            <h3>Writing</h3>
+                            <p>Crafting your script</p>
+                            <div class="card-number">02</div>
+                        </div>
+                        <div class="card-back">
+                            <div class="card-icon success">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h3>Complete</h3>
+                            <p>Script created</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="progress-status">⏳</div>
-            </div>
 
-            <div class="progress-card" id="step3">
-                <div class="progress-icon">🎣</div>
-                <div class="progress-content">
-                    <h3>Creating Hooks</h3>
-                    <p>Generating 5 viral hook variations...</p>
+                <div class="process-card" id="card3">
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="card-icon">
+                                <i class="fas fa-fish"></i>
+                            </div>
+                            <h3>Generating</h3>
+                            <p>Creating hooks</p>
+                            <div class="card-number">03</div>
+                        </div>
+                        <div class="card-back">
+                            <div class="card-icon success">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h3>Complete</h3>
+                            <p>Hooks ready</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="progress-status">⏳</div>
-            </div>
 
-            <div class="progress-card" id="step4">
-                <div class="progress-icon">✨</div>
-                <div class="progress-content">
-                    <h3>Finalizing</h3>
-                    <p>Polishing your content...</p>
+                <div class="process-card" id="card4">
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="card-icon">
+                                <i class="fas fa-sparkles"></i>
+                            </div>
+                            <h3>Finalizing</h3>
+                            <p>Polishing content</p>
+                            <div class="card-number">04</div>
+                        </div>
+                        <div class="card-back">
+                            <div class="card-icon success">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h3>Complete</h3>
+                            <p>All done!</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="progress-status">⏳</div>
             </div>
         </div>
 
         <!-- Results Section -->
         <div id="results" class="results-section" style="display: none;">
-            <div class="results-header">
-                <h2>🎉 Your Content is Ready!</h2>
+            <div class="success-animation">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2>Content Ready!</h2>
                 <p id="timestamp" class="timestamp"></p>
             </div>
 
-            <div class="result-card script-card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <span class="card-icon">📝</span>
-                        <h3>Generated Script</h3>
+            <div class="results-grid">
+                <div class="result-card glass-card script-card">
+                    <div class="card-badge">
+                        <i class="fas fa-file-alt"></i> Script
                     </div>
-                    <button class="copy-btn" onclick="copyToClipboard('script')">
-                        <span class="copy-icon">📋</span>
-                        Copy
-                    </button>
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-scroll card-icon-large"></i>
+                            <h3>Your Script</h3>
+                        </div>
+                        <button class="copy-btn" onclick="copyToClipboard('script')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <div id="script" class="content-box"></div>
                 </div>
-                <div id="script" class="content-box"></div>
+
+                <div class="result-card glass-card hooks-card">
+                    <div class="card-badge hooks-badge">
+                        <i class="fas fa-fish"></i> Hooks
+                    </div>
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-list-ul card-icon-large"></i>
+                            <h3>Hook Variations</h3>
+                        </div>
+                        <button class="copy-btn" onclick="copyToClipboard('hooks')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <div id="hooks" class="content-box"></div>
+                </div>
             </div>
 
-            <div class="result-card hooks-card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <span class="card-icon">🎣</span>
-                        <h3>5 Hook Variations</h3>
-                    </div>
-                    <button class="copy-btn" onclick="copyToClipboard('hooks')">
-                        <span class="copy-icon">📋</span>
-                        Copy
-                    </button>
-                </div>
-                <div id="hooks" class="content-box"></div>
-            </div>
-
-            <button class="new-generation-btn" onclick="resetForm()">
-                <span>✨</span> Generate Another
+            <button class="new-generation-btn glass-card" onclick="resetForm()">
+                <i class="fas fa-redo-alt"></i>
+                Generate Another
+                <i class="fas fa-arrow-right"></i>
             </button>
         </div>
 
-        <div id="error" class="error-box" style="display: none;"></div>
+        <div id="error" class="error-box glass-card" style="display: none;"></div>
     </div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
