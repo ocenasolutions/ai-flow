@@ -1,0 +1,28 @@
+TOPIC: AI automation for small businesses
+
+============================================================
+Hook 1: आपका business ऐसा हो सकता है जो पूरी तरह से AUTO-PILOT पर चलता है… और आप मासिक लाखों कमा सकते हैं!
+Pattern: ASPIRATIONAL
+Confidence: 8
+Target: Ambitious small business owners
+
+Hook 2: क्या आपको लगता है कि आपका business TIME और MONEY बर्बाद कर रहा है... मैनुअल काम से?
+Pattern: PAIN POINT
+Confidence: 9
+Target: Frustrated small business owners
+
+Hook 3: 90% small businesses को पता नहीं है कि AI automation से वे अपने COMPETITORS से आगे निकल सकते हैं...
+Pattern: EXCLUSIVITY
+Confidence: 7
+Target: Curious small business owners
+
+Hook 4: Get ₹10 लाख की सालाना बचत in JUST 30 दिनों में... AI automation के साथ!
+Pattern: SPECIFIC RESULT
+Confidence: 6
+Target: Small business owners looking for quick results
+
+Hook 5: क्या AI automation आपके business को COMPLETELY बदल सकता है... या यह सिर्फ एक MYTH है?
+Pattern: CURIOSITY GAP
+Confidence: 8
+Target: Skeptical small business owners
+============================================================

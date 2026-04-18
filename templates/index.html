@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Content Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 AI Content Generator</h1>
+            <p class="subtitle">Generate viral scripts & hooks in your voice</p>
+        </header>
+
+        <div class="input-section">
+            <div class="input-group">
+                <label for="topic">Enter Your Topic:</label>
+                <input 
+                    type="text" 
+                    id="topic" 
+                    placeholder="e.g., AI automation for small businesses"
+                    value="AI automation for small businesses"
+                >
+            </div>
+            
+            <button id="generateBtn" class="generate-btn">
+                <span class="btn-text">Generate Content</span>
+                <span class="loader" style="display: none;">⏳</span>
+            </button>
+        </div>
+
+        <div id="results" class="results-section" style="display: none;">
+            <div class="result-card">
+                <div class="card-header">
+                    <h2>📝 Generated Script</h2>
+                    <button class="copy-btn" onclick="copyToClipboard('script')">Copy</button>
+                </div>
+                <div id="script" class="content-box"></div>
+            </div>
+
+            <div class="result-card">
+                <div class="card-header">
+                    <h2>🎣 5 Hook Variations</h2>
+                    <button class="copy-btn" onclick="copyToClipboard('hooks')">Copy</button>
+                </div>
+                <div id="hooks" class="content-box"></div>
+            </div>
+
+            <div class="info-box">
+                <p id="timestamp"></p>
+            </div>
+        </div>
+
+        <div id="error" class="error-box" style="display: none;"></div>
+
+        <div id="loading" class="loading-overlay" style="display: none;">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <p>Generating your content...</p>
+                <p class="loading-subtext">This takes 5-10 seconds</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
