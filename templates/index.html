@@ -9,13 +9,14 @@
 <body>
     <div class="container">
         <header>
-            <h1>🤖 AI Content Generator</h1>
-            <p class="subtitle">Generate viral scripts & hooks in your voice</p>
+            <div class="logo">✨</div>
+            <h1>AI Content Generator</h1>
+            <p class="subtitle">Generate viral scripts & hooks in seconds</p>
         </header>
 
         <div class="input-section">
             <div class="input-group">
-                <label for="topic">Enter Your Topic:</label>
+                <label for="topic">What's your topic?</label>
                 <input 
                     type="text" 
                     id="topic" 
@@ -25,42 +26,91 @@
             </div>
             
             <button id="generateBtn" class="generate-btn">
+                <span class="btn-icon">🚀</span>
                 <span class="btn-text">Generate Content</span>
-                <span class="loader" style="display: none;">⏳</span>
             </button>
         </div>
 
+        <!-- Loading Progress Cards -->
+        <div id="loadingProgress" class="loading-progress" style="display: none;">
+            <div class="progress-card" id="step1">
+                <div class="progress-icon">🔍</div>
+                <div class="progress-content">
+                    <h3>Analyzing Topic</h3>
+                    <p>Understanding your content requirements...</p>
+                </div>
+                <div class="progress-status">⏳</div>
+            </div>
+
+            <div class="progress-card" id="step2">
+                <div class="progress-icon">✍️</div>
+                <div class="progress-content">
+                    <h3>Writing Script</h3>
+                    <p>Crafting your script in Hinglish voice...</p>
+                </div>
+                <div class="progress-status">⏳</div>
+            </div>
+
+            <div class="progress-card" id="step3">
+                <div class="progress-icon">🎣</div>
+                <div class="progress-content">
+                    <h3>Creating Hooks</h3>
+                    <p>Generating 5 viral hook variations...</p>
+                </div>
+                <div class="progress-status">⏳</div>
+            </div>
+
+            <div class="progress-card" id="step4">
+                <div class="progress-icon">✨</div>
+                <div class="progress-content">
+                    <h3>Finalizing</h3>
+                    <p>Polishing your content...</p>
+                </div>
+                <div class="progress-status">⏳</div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
         <div id="results" class="results-section" style="display: none;">
-            <div class="result-card">
+            <div class="results-header">
+                <h2>🎉 Your Content is Ready!</h2>
+                <p id="timestamp" class="timestamp"></p>
+            </div>
+
+            <div class="result-card script-card">
                 <div class="card-header">
-                    <h2>📝 Generated Script</h2>
-                    <button class="copy-btn" onclick="copyToClipboard('script')">Copy</button>
+                    <div class="card-title">
+                        <span class="card-icon">📝</span>
+                        <h3>Generated Script</h3>
+                    </div>
+                    <button class="copy-btn" onclick="copyToClipboard('script')">
+                        <span class="copy-icon">📋</span>
+                        Copy
+                    </button>
                 </div>
                 <div id="script" class="content-box"></div>
             </div>
 
-            <div class="result-card">
+            <div class="result-card hooks-card">
                 <div class="card-header">
-                    <h2>🎣 5 Hook Variations</h2>
-                    <button class="copy-btn" onclick="copyToClipboard('hooks')">Copy</button>
+                    <div class="card-title">
+                        <span class="card-icon">🎣</span>
+                        <h3>5 Hook Variations</h3>
+                    </div>
+                    <button class="copy-btn" onclick="copyToClipboard('hooks')">
+                        <span class="copy-icon">📋</span>
+                        Copy
+                    </button>
                 </div>
                 <div id="hooks" class="content-box"></div>
             </div>
 
-            <div class="info-box">
-                <p id="timestamp"></p>
-            </div>
+            <button class="new-generation-btn" onclick="resetForm()">
+                <span>✨</span> Generate Another
+            </button>
         </div>
 
         <div id="error" class="error-box" style="display: none;"></div>
-
-        <div id="loading" class="loading-overlay" style="display: none;">
-            <div class="loading-content">
-                <div class="spinner"></div>
-                <p>Generating your content...</p>
-                <p class="loading-subtext">This takes 5-10 seconds</p>
-            </div>
-        </div>
     </div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
