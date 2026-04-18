@@ -8,7 +8,6 @@ import os
 import sys
 from groq import Groq
 from dotenv import load_dotenv
-import pandas as pd
 from datetime import datetime
 
 # Load environment variables

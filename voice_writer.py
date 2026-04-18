@@ -129,16 +129,8 @@ def main():
     if len(sys.argv) > 1:
         topic = ' '.join(sys.argv[1:])
     else:
-        # Try to read from validator output
-        try:
-            import pandas as pd
-            df = pd.read_csv('content_validator_output.csv')
-            topic_counts = df['topic'].value_counts()
-            topic = topic_counts.index[0] if len(topic_counts) > 0 else "AI automation for businesses"
-            print(f"📌 Using top validated topic: {topic}")
-        except:
-            topic = "AI automation for businesses"
-            print(f"📌 Using default topic: {topic}")
+        topic = "AI automation for businesses"
+        print(f"📌 Using default topic: {topic}")
     
     print(f"\n🎯 Topic: {topic}")
     print("\n⏳ Generating script...")
