@@ -1,11 +1,16 @@
 // Main JavaScript for AI Content Generator
 
 const generateBtn = document.getElementById('generateBtn');
+const researchBtn = document.getElementById('researchBtn');
 const topicInput = document.getElementById('topic');
 const resultsSection = document.getElementById('results');
+const researchResults = document.getElementById('researchResults');
 const errorBox = document.getElementById('error');
 const loadingProgress = document.getElementById('loadingProgress');
 const themeToggle = document.getElementById('themeToggle');
+
+// Store recommended topic globally
+let currentRecommendedTopic = '';
 
 // Theme Toggle
 themeToggle.addEventListener('click', () => {
@@ -43,6 +48,9 @@ window.addEventListener('load', () => {
 
 // Generate content on button click
 generateBtn.addEventListener('click', generateContent);
+
+// Research topics on button click
+researchBtn.addEventListener('click', researchTopics);
 
 // Allow Enter key to trigger generation
 topicInput.addEventListener('keypress', (e) => {
@@ -189,6 +197,7 @@ function resetForm() {
     
     // Hide results
     resultsSection.style.display = 'none';
+    researchResults.style.display = 'none';
     loadingProgress.style.display = 'none';
     
     // Scroll to top
@@ -196,6 +205,229 @@ function resetForm() {
     
     // Focus on input
     topicInput.focus();
+}
+
+async function researchTopics() {
+    // Hide previous results and errors
+    resultsSection.style.display = 'none';
+    researchResults.style.display = 'none';
+    errorBox.style.display = 'none';
+    
+    // Show loading progress
+    loadingProgress.style.display = 'block';
+    researchBtn.disabled = true;
+    generateBtn.disabled = true;
+    
+    // Reset all cards
+    resetCards();
+    
+    // Animate cards sequentially
+    animateCards();
+    
+    try {
+        const response = await fetch('/research', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                keywords: [
+                    'AI automation business',
+                    'make money online',
+                    'digital marketing tips',
+                    'entrepreneur advice',
+                    'business growth'
+                ]
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Research failed');
+        }
+        
+        const data = await response.json();
+        
+        // Wait for all cards to complete
+        await sleep(8000);
+        
+        // Display research results
+        displayResearchResults(data);
+        
+    } catch (error) {
+        showError('Research failed: ' + error.message);
+        console.error('Error:', error);
+        loadingProgress.style.display = 'none';
+    } finally {
+        researchBtn.disabled = false;
+        generateBtn.disabled = false;
+    }
+}
+
+function displayResearchResults(data) {
+    // Hide loading
+    loadingProgress.style.display = 'none';
+    
+    // Show research results section
+    researchResults.style.display = 'block';
+    
+    // Check for warnings
+    if (data.warning) {
+        showError(data.warning);
+        return;
+    }
+    
+    // Display timestamp
+    document.getElementById('researchTimestamp').textContent = 
+        `Analyzed at ${new Date().toLocaleString()}`;
+    
+    // Display source information and mode
+    const sourceInfo = document.getElementById('sourceInfo');
+    const primarySource = data.primary_source || 'unknown';
+    const instagramCount = data.instagram_posts || 0;
+    const youtubeCount = data.youtube_posts || 0;
+    const mode = data.mode || 'unknown';
+    
+    let sourceHTML = '<div class="source-stats">';
+    
+    // Display mode badge
+    if (mode === 'instagram_only') {
+        sourceHTML += `<span class="mode-badge render">🚀 Render Mode: Instagram Only</span>`;
+    } else if (mode === 'instagram_and_youtube') {
+        sourceHTML += `<span class="mode-badge local">💻 Local Mode: Instagram + YouTube</span>`;
+    }
+    
+    // Display source info
+    if (primarySource === 'instagram') {
+        sourceHTML += `
+            <span class="source-badge-large primary">📸 Instagram Primary</span>
+            <span class="source-count">${instagramCount} Instagram posts</span>
+        `;
+        if (youtubeCount > 0) {
+            sourceHTML += `<span class="source-count secondary">${youtubeCount} YouTube posts (backup)</span>`;
+        }
+    } else if (primarySource === 'youtube') {
+        sourceHTML += `
+            <span class="source-badge-large backup">📺 YouTube Backup</span>
+            <span class="source-count">${youtubeCount} YouTube posts</span>
+        `;
+    }
+    
+    sourceHTML += '</div>';
+    sourceInfo.innerHTML = sourceHTML;
+    
+    // Display recommended topic
+    if (data.recommended_topic) {
+        currentRecommendedTopic = data.recommended_topic.keyword;
+        document.getElementById('recommendedKeyword').textContent = 
+            data.recommended_topic.keyword.toUpperCase();
+        document.getElementById('recommendedReason').textContent = 
+            data.recommended_topic.reason;
+    }
+    
+    // Display top topics table
+    const topicsTable = document.getElementById('topicsTable');
+    let tableHTML = `
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Topic</th>
+                    <th>Score</th>
+                    <th>Posts</th>
+                    <th>Avg ER</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    data.top_topics.forEach(topic => {
+        tableHTML += `
+            <tr>
+                <td><span class="rank-badge">#${topic.rank}</span></td>
+                <td><strong>${topic.keyword}</strong></td>
+                <td>${topic.avg_score.toFixed(2)}</td>
+                <td>${topic.post_count}</td>
+                <td>${topic.avg_engagement_rate}%</td>
+                <td>
+                    <button class="use-btn" onclick="useTopic('${topic.keyword}')">
+                        <i class="fas fa-magic"></i> Use
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tableHTML += `
+            </tbody>
+        </table>
+    `;
+    
+    topicsTable.innerHTML = tableHTML;
+    
+    // Display stats
+    document.getElementById('totalAnalyzed').textContent = data.total_analyzed;
+    document.getElementById('passedFilters').textContent = data.passed_filters;
+    document.getElementById('viralFlag').textContent = 
+        data.repeat_viral_flag ? '🔥 YES' : 'No';
+    
+    // Scroll to results
+    researchResults.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function useRecommendedTopic() {
+    if (currentRecommendedTopic) {
+        topicInput.value = currentRecommendedTopic;
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Highlight input
+        topicInput.focus();
+        topicInput.select();
+        
+        // Show feedback
+        showSuccess('Topic loaded! Click "Generate Magic" to create content.');
+    }
+}
+
+function useTopic(keyword) {
+    topicInput.value = keyword;
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Highlight input
+    topicInput.focus();
+    topicInput.select();
+    
+    // Show feedback
+    showSuccess('Topic loaded! Click "Generate Magic" to create content.');
+}
+
+function showSuccess(message) {
+    const successBox = document.createElement('div');
+    successBox.className = 'success-box glass-card';
+    successBox.innerHTML = '<i class="fas fa-check-circle"></i> ' + message;
+    successBox.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        padding: 15px 20px;
+        background: rgba(76, 175, 80, 0.2);
+        border: 1px solid rgba(76, 175, 80, 0.5);
+        border-radius: 12px;
+        color: #4caf50;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(successBox);
+    
+    setTimeout(() => {
+        successBox.remove();
+    }, 3000);
 }
 
 function sleep(ms) {

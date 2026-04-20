@@ -10,6 +10,10 @@ from groq import Groq
 from dotenv import load_dotenv
 from datetime import datetime
 
+# Import the new agents
+from content_scraper import run_scraper, scraped_data
+from content_validator import validate_content, validation_results
+
 # Load environment variables
 load_dotenv()
 
@@ -25,19 +29,19 @@ def analyze_voice_patterns():
     
     return """
 VOICE ANALYSIS:
-- Uses Hinglish mix naturally (अगर, ऐसी, etc.)
-- Direct, no-fluff language
-- Business terms: "conversion", "funnel", "automation", "system"
-- Currency in ₹ (rupees)
-- Strong action words: "STOP", "NO", "gone", "waste"
-- Very short, punchy lines (3-7 words average)
-- Uses "→" for flow/progression
-- Lists with "No X / No Y / No Z" pattern
-- Rhetorical questions followed by answers
-- Always ends with clear CTA: "DM '[KEYWORD]' — [what they get]"
-- 80% English, 20% Hindi
-- Authoritative but not arrogant
-- Urgent without being pushy
+- Niche: Web Dev, App Dev, AI Automation, Tech Consulting
+- Audience: Indian entrepreneurs and business owners
+- Uses Hinglish naturally (80% English, 20% Hindi)
+- Business terms: "client", "revenue", "agency", "project", "automation", "stack"
+- Currency always in ₹ (rupees)
+- Strong action words: "STOP", "WRONG", "already", "wasted", "fixed"
+- Very short punchy lines (3-8 words)
+- Uses "→" for flow and progression
+- Social proof: "We built", "Our clients", "12 projects this year"
+- Always ends with CTA: DM or Comment with a KEYWORD in quotes
+- Authoritative but approachable
+- Urgent but not pushy
+- Never sounds salesy — sounds like advice from a knowledgeable friend
 """
 
 def generate_script(topic):
@@ -99,11 +103,11 @@ def generate_hooks(topic, script_content):
     
     hook_patterns = """
 HOOK STYLE PATTERNS:
-Pattern 1 - ASPIRATIONAL: "अगर आपकी website ऐसी दिखती है… you're losing money daily."
-Pattern 2 - PAIN POINT: "Thinking to build an app? STOP."
-Pattern 3 - EXCLUSIVITY: "90% startups fail online for THIS reason…"
-Pattern 4 - SPECIFIC RESULT: "Want clients in 7 days? Here's how."
-Pattern 5 - CURIOSITY GAP: "AI is replacing teams… but smart founders are printing money."
+Pattern 1 - ASPIRATIONAL: "अगर आपकी website ऐसी दिखती है… you're losing clients daily."
+Pattern 2 - PAIN POINT: "Thinking to build an app? STOP. You're about to waste ₹3 lakhs."
+Pattern 3 - EXCLUSIVITY: "90% businesses fail online for THIS one tech mistake…"
+Pattern 4 - SPECIFIC RESULT: "We automated a Delhi agency in 4 days. Zero extra staff."
+Pattern 5 - CURIOSITY GAP: "Website ya App — most founders are choosing wrong…"
 
 STYLE NOTES:
 - Mix Hindi/English naturally
@@ -194,6 +198,99 @@ def generate():
     except Exception as e:
         return jsonify({
             'error': f'Server error: {str(e)}'
+        }), 500
+
+@app.route('/research', methods=['POST'])
+def research():
+    """
+    Research trending topics endpoint
+    Runs content scraper and validator
+    PRIMARY: Instagram profiles only
+    BACKUP: YouTube (local only, not on Render)
+    """
+    try:
+        data = request.json
+        keywords = data.get('keywords', [
+            'web development India 2025',
+            'app development for business',
+            'AI automation for entrepreneurs',
+            'tech consulting India',
+            'how to build a website business',
+            'AI tools for small business India',
+            'freelance web developer India',
+            'software agency growth',
+            'Claude Code tutorial',
+            'make money with tech skills India'
+        ])
+        
+        # Ensure keywords is a list
+        if isinstance(keywords, str):
+            keywords = [k.strip() for k in keywords.split(',')]
+        
+        print(f"\n🔍 Research request received with keywords: {keywords}")
+        
+        # Determine mode based on environment
+        is_render = os.getenv('RENDER', '').lower() == 'true'
+        mode = 'instagram_only' if is_render else 'instagram_and_youtube'
+        
+        # Step 1: Run content scraper (Instagram-first)
+        print("📊 Running content scraper...")
+        scraped = run_scraper(keywords)
+        
+        if not scraped:
+            return jsonify({
+                'error': 'No content found. Check Instagram credentials or try different keywords.',
+                'scraped_count': 0,
+                'primary_source': 'none',
+                'mode': mode
+            }), 404
+        
+        # Determine primary source
+        instagram_count = sum(1 for p in scraped if p.get('platform') == 'instagram')
+        youtube_count = sum(1 for p in scraped if p.get('platform') == 'youtube')
+        
+        if instagram_count > 0:
+            primary_source = 'instagram'
+        elif youtube_count > 0:
+            primary_source = 'youtube'
+        else:
+            primary_source = 'none'
+        
+        # Step 2: Run content validator
+        print("🔍 Running content validator...")
+        results = validate_content(scraped)
+        
+        if 'error' in results:
+            return jsonify({
+                'warning': results['error'],
+                'total_scraped': results['total_analyzed'],
+                'passed_filters': results['passed_filters'],
+                'primary_source': primary_source,
+                'instagram_posts': instagram_count,
+                'youtube_posts': youtube_count,
+                'mode': mode
+            }), 200
+        
+        # Add source information to results
+        results['primary_source'] = primary_source
+        results['instagram_posts'] = instagram_count
+        results['youtube_posts'] = youtube_count
+        results['mode'] = mode
+        
+        print(f"✅ Research complete! Found {len(results['top_topics'])} trending topics")
+        print(f"📊 Primary source: {primary_source}")
+        print(f"🚀 Mode: {mode}")
+        
+        return jsonify(results)
+        
+    except Exception as e:
+        print(f"❌ Research error: {str(e)}")
+        is_render = os.getenv('RENDER', '').lower() == 'true'
+        mode = 'instagram_only' if is_render else 'instagram_and_youtube'
+        return jsonify({
+            'error': f'Research failed: {str(e)}. Please check your configuration and try again.',
+            'primary_source': 'error',
+            'mode': mode
         }), 500
 
 @app.route('/health')

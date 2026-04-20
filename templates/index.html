@@ -3,27 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Content Generator</title>
+    <title>ContentFlow — AI Content Studio</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="light-theme">
-    <div class="background-animation">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-    </div>
+    <div class="background-animation"></div>
 
-    <!-- Theme Switcher -->
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-        <i class="fas fa-moon"></i>
+        <i class="fas fa-circle-half-stroke"></i>
     </button>
 
     <div class="container">
         <header>
             <div class="logo-container">
                 <i class="fas fa-wand-magic-sparkles logo-icon"></i>
-                <div class="logo-glow"></div>
             </div>
             <h1>AI Content Generator</h1>
             <p class="subtitle">Transform ideas into viral content instantly</p>
@@ -41,96 +35,81 @@
             </div>
             
             <button id="generateBtn" class="generate-btn">
-                <span class="btn-gradient"></span>
                 <span class="btn-content">
                     <i class="fas fa-rocket"></i>
-                    <span class="btn-text">Generate Magic</span>
+                    <span class="btn-text">Generate Content</span>
                 </span>
             </button>
+
+            <div class="research-btn-wrapper">
+                <button id="researchBtn" class="research-btn">
+                    <span class="btn-content">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="btn-text">Research Trending Topics</span>
+                    </span>
+                </button>
+                <span class="source-badge">
+                    <i class="fab fa-instagram"></i>
+                    Instagram-first
+                </span>
+            </div>
         </div>
 
-        <!-- Animated Process Cards -->
+        <!-- Pipeline Progress -->
         <div id="loadingProgress" class="loading-container" style="display: none;">
-            <div class="process-cards">
+            <p class="pipeline-title">Crafting your content&hellip;</p>
+            <div class="pipeline">
+
                 <div class="process-card" id="card1">
-                    <div class="card-inner">
-                        <div class="card-front">
-                            <div class="card-icon">
-                                <i class="fas fa-search"></i>
-                            </div>
-                            <h3>Analyzing</h3>
-                            <p>Understanding your topic</p>
-                            <div class="card-number">01</div>
+                    <div class="pipeline-box">
+                        <div class="pipeline-icon-wrap">
+                            <i class="fas fa-magnifying-glass pipeline-main-icon"></i>
+                            <i class="fas fa-check pipeline-done-icon"></i>
                         </div>
-                        <div class="card-back">
-                            <div class="card-icon success">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                            <h3>Complete</h3>
-                            <p>Topic analyzed</p>
-                        </div>
+                        <h3>Analyzing</h3>
+                        <p>Understanding your topic</p>
                     </div>
                 </div>
+
+                <div class="pipeline-connector"></div>
 
                 <div class="process-card" id="card2">
-                    <div class="card-inner">
-                        <div class="card-front">
-                            <div class="card-icon">
-                                <i class="fas fa-pen-fancy"></i>
-                            </div>
-                            <h3>Writing</h3>
-                            <p>Crafting your script</p>
-                            <div class="card-number">02</div>
+                    <div class="pipeline-box">
+                        <div class="pipeline-icon-wrap">
+                            <i class="fas fa-pen pipeline-main-icon"></i>
+                            <i class="fas fa-check pipeline-done-icon"></i>
                         </div>
-                        <div class="card-back">
-                            <div class="card-icon success">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                            <h3>Complete</h3>
-                            <p>Script created</p>
-                        </div>
+                        <h3>Writing</h3>
+                        <p>Crafting your script</p>
                     </div>
                 </div>
+
+                <div class="pipeline-connector"></div>
 
                 <div class="process-card" id="card3">
-                    <div class="card-inner">
-                        <div class="card-front">
-                            <div class="card-icon">
-                                <i class="fas fa-fish"></i>
-                            </div>
-                            <h3>Generating</h3>
-                            <p>Creating hooks</p>
-                            <div class="card-number">03</div>
+                    <div class="pipeline-box">
+                        <div class="pipeline-icon-wrap">
+                            <i class="fas fa-bolt pipeline-main-icon"></i>
+                            <i class="fas fa-check pipeline-done-icon"></i>
                         </div>
-                        <div class="card-back">
-                            <div class="card-icon success">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                            <h3>Complete</h3>
-                            <p>Hooks ready</p>
-                        </div>
+                        <h3>Generating</h3>
+                        <p>Creating hooks</p>
                     </div>
                 </div>
 
+                <div class="pipeline-connector"></div>
+
                 <div class="process-card" id="card4">
-                    <div class="card-inner">
-                        <div class="card-front">
-                            <div class="card-icon">
-                                <i class="fas fa-sparkles"></i>
-                            </div>
-                            <h3>Finalizing</h3>
-                            <p>Polishing content</p>
-                            <div class="card-number">04</div>
+                    <div class="pipeline-box">
+                        <div class="pipeline-icon-wrap">
+                            <i class="fas fa-sliders pipeline-main-icon"></i>
+                            <i class="fas fa-check pipeline-done-icon"></i>
                         </div>
-                        <div class="card-back">
-                            <div class="card-icon success">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                            <h3>Complete</h3>
-                            <p>All done!</p>
-                        </div>
+                        <h3>Finalizing</h3>
+                        <p>Polishing content</p>
                     </div>
                 </div>
+
             </div>
         </div>
 
@@ -138,7 +117,7 @@
         <div id="results" class="results-section" style="display: none;">
             <div class="success-animation">
                 <div class="success-icon">
-                    <i class="fas fa-check-circle"></i>
+                    <i class="fas fa-circle-check"></i>
                 </div>
                 <h2>Content Ready!</h2>
                 <p id="timestamp" class="timestamp"></p>
@@ -155,7 +134,7 @@
                             <h3>Your Script</h3>
                         </div>
                         <button class="copy-btn" onclick="copyToClipboard('script')">
-                            <i class="fas fa-copy"></i>
+                            <i class="fas fa-copy"></i> Copy
                         </button>
                     </div>
                     <div id="script" class="content-box"></div>
@@ -163,7 +142,7 @@
 
                 <div class="result-card glass-card hooks-card">
                     <div class="card-badge hooks-badge">
-                        <i class="fas fa-fish"></i> Hooks
+                        <i class="fas fa-bolt"></i> Hooks
                     </div>
                     <div class="card-header">
                         <div class="card-title">
@@ -171,7 +150,7 @@
                             <h3>Hook Variations</h3>
                         </div>
                         <button class="copy-btn" onclick="copyToClipboard('hooks')">
-                            <i class="fas fa-copy"></i>
+                            <i class="fas fa-copy"></i> Copy
                         </button>
                     </div>
                     <div id="hooks" class="content-box"></div>
@@ -179,8 +158,68 @@
             </div>
 
             <button class="new-generation-btn glass-card" onclick="resetForm()">
-                <i class="fas fa-redo-alt"></i>
+                <i class="fas fa-rotate-left"></i>
                 Generate Another
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- Research Results Section -->
+        <div id="researchResults" class="research-section" style="display: none;">
+            <div class="success-animation">
+                <div class="success-icon">
+                    <i class="fas fa-circle-check"></i>
+                </div>
+                <h2>Research Complete!</h2>
+                <p id="researchTimestamp" class="timestamp"></p>
+                <div id="sourceInfo" class="source-info"></div>
+            </div>
+
+            <div id="recommendedTopic" class="recommended-card glass-card">
+                <div class="card-badge">
+                    <i class="fas fa-arrow-trend-up"></i> Top Recommendation
+                </div>
+                <div class="recommended-content">
+                    <h3 id="recommendedKeyword">Loading...</h3>
+                    <p id="recommendedReason">Loading...</p>
+                    <button class="use-topic-btn" onclick="useRecommendedTopic()">
+                        <i class="fas fa-arrow-right"></i>
+                        Use This Topic
+                    </button>
+                </div>
+            </div>
+
+            <div class="topics-card glass-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-fire card-icon-large"></i>
+                        <h3>Top Trending Topics</h3>
+                    </div>
+                </div>
+                <div id="topicsTable" class="topics-table"></div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card glass-card">
+                    <i class="fas fa-layer-group"></i>
+                    <div class="stat-value" id="totalAnalyzed">0</div>
+                    <div class="stat-label">Posts Analyzed</div>
+                </div>
+                <div class="stat-card glass-card">
+                    <i class="fas fa-sliders"></i>
+                    <div class="stat-value" id="passedFilters">0</div>
+                    <div class="stat-label">High Quality</div>
+                </div>
+                <div class="stat-card glass-card">
+                    <i class="fas fa-signal"></i>
+                    <div class="stat-value" id="viralFlag">—</div>
+                    <div class="stat-label">Viral Signal</div>
+                </div>
+            </div>
+
+            <button class="new-generation-btn glass-card" onclick="resetForm()">
+                <i class="fas fa-rotate-left"></i>
+                Research Again
                 <i class="fas fa-arrow-right"></i>
             </button>
         </div>
