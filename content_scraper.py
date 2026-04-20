@@ -6,12 +6,18 @@ SECONDARY: Twitter/X via RapidAPI (search + user tweets)
 BACKUP: YouTube Shorts with browser cookies (local only)
 """
 
-import yt_dlp
 import requests
 from datetime import datetime, timedelta, timezone
 import time
 import os
 from dotenv import load_dotenv
+
+# Optional import for YouTube (only needed locally, not on Render)
+try:
+    import yt_dlp
+    YT_DLP_AVAILABLE = True
+except ImportError:
+    YT_DLP_AVAILABLE = False
 
 # Load environment variables
 load_dotenv()
@@ -605,6 +611,11 @@ def scrape_youtube_shorts(keywords):
         List of dicts with video data
     """
     youtube_data = []
+    
+    # Check if yt_dlp is available
+    if not YT_DLP_AVAILABLE:
+        print("📺 YouTube scraping unavailable (yt-dlp not installed)")
+        return youtube_data
     
     # Check if running on Render (no browser available)
     if is_render_deployment():
