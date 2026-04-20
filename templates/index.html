@@ -48,10 +48,30 @@
                         <span class="btn-text">Research Trending Topics</span>
                     </span>
                 </button>
-                <span class="source-badge">
-                    <i class="fab fa-instagram"></i>
-                    Instagram-first
-                </span>
+                <div class="platform-selector">
+                    <p class="selector-label">Select platforms to analyze:</p>
+                    <div class="source-badges">
+                        <button class="source-badge selectable active" data-platform="instagram">
+                            <i class="fab fa-instagram"></i>
+                            <span>Instagram</span>
+                            <i class="fas fa-check-circle check-icon"></i>
+                        </button>
+                        <button class="source-badge selectable active" data-platform="twitter">
+                            <i class="fab fa-twitter"></i>
+                            <span>Twitter</span>
+                            <i class="fas fa-check-circle check-icon"></i>
+                        </button>
+                        <button class="source-badge selectable" data-platform="youtube">
+                            <i class="fab fa-youtube"></i>
+                            <span>YouTube</span>
+                            <i class="fas fa-check-circle check-icon"></i>
+                        </button>
+                    </div>
+                </div>
+                <p class="research-hint">
+                    <i class="fas fa-info-circle"></i>
+                    Click platforms to select/deselect • Analyzes viral content from top creators
+                </p>
             </div>
         </div>
 
@@ -133,7 +153,7 @@
                             <i class="fas fa-scroll card-icon-large"></i>
                             <h3>Your Script</h3>
                         </div>
-                        <button class="copy-btn" onclick="copyToClipboard('script')">
+                        <button class="copy-btn" onclick="copyToClipboard('script', this)">
                             <i class="fas fa-copy"></i> Copy
                         </button>
                     </div>
@@ -149,7 +169,7 @@
                             <i class="fas fa-list-ul card-icon-large"></i>
                             <h3>Hook Variations</h3>
                         </div>
-                        <button class="copy-btn" onclick="copyToClipboard('hooks')">
+                        <button class="copy-btn" onclick="copyToClipboard('hooks', this)">
                             <i class="fas fa-copy"></i> Copy
                         </button>
                     </div>
@@ -197,6 +217,16 @@
                     </div>
                 </div>
                 <div id="topicsTable" class="topics-table"></div>
+            </div>
+
+            <div class="posts-card glass-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-link card-icon-large"></i>
+                        <h3>Viral Posts Found</h3>
+                    </div>
+                </div>
+                <div id="postsGrid" class="posts-grid"></div>
             </div>
 
             <div class="stats-grid">

@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 
 # Import the new agents
-from content_scraper import run_scraper, scraped_data
+from content_scraper import run_scraper, run_scraper_selective, scraped_data
 from content_validator import validate_content, validation_results
 
 # Load environment variables
@@ -204,12 +204,23 @@ def generate():
 def research():
     """
     Research trending topics endpoint
-    Runs content scraper and validator
-    PRIMARY: Instagram profiles only
-    BACKUP: YouTube (local only, not on Render)
+    Runs content scraper and validator based on selected platforms
     """
     try:
         data = request.json
+        
+        # Get selected platforms (default: instagram + twitter)
+        platforms = data.get('platforms', ['instagram', 'twitter'])
+        
+        # Validate platforms
+        valid_platforms = ['instagram', 'twitter', 'youtube']
+        platforms = [p for p in platforms if p in valid_platforms]
+        
+        if not platforms:
+            return jsonify({
+                'error': 'No valid platforms selected. Choose from: instagram, twitter, youtube'
+            }), 400
+        
         keywords = data.get('keywords', [
             'web development India 2025',
             'app development for business',
@@ -227,36 +238,26 @@ def research():
         if isinstance(keywords, str):
             keywords = [k.strip() for k in keywords.split(',')]
         
-        print(f"\n🔍 Research request received with keywords: {keywords}")
+        print(f"\n🔍 Research request received")
+        print(f"   Platforms: {', '.join(platforms)}")
+        print(f"   Keywords: {len(keywords)} keywords")
         
-        # Determine mode based on environment
-        is_render = os.getenv('RENDER', '').lower() == 'true'
-        mode = 'instagram_only' if is_render else 'instagram_and_youtube'
-        
-        # Step 1: Run content scraper (Instagram-first)
-        print("📊 Running content scraper...")
-        scraped = run_scraper(keywords)
+        # Run scraper with selected platforms
+        scraped = run_scraper_selective(platforms, keywords)
         
         if not scraped:
             return jsonify({
-                'error': 'No content found. Check Instagram credentials or try different keywords.',
+                'error': 'No content found. Check your configuration or try different platforms.',
                 'scraped_count': 0,
-                'primary_source': 'none',
-                'mode': mode
+                'platforms_used': platforms
             }), 404
         
-        # Determine primary source
+        # Count posts by platform
         instagram_count = sum(1 for p in scraped if p.get('platform') == 'instagram')
+        twitter_count = sum(1 for p in scraped if p.get('platform') == 'twitter')
         youtube_count = sum(1 for p in scraped if p.get('platform') == 'youtube')
         
-        if instagram_count > 0:
-            primary_source = 'instagram'
-        elif youtube_count > 0:
-            primary_source = 'youtube'
-        else:
-            primary_source = 'none'
-        
-        # Step 2: Run content validator
+        # Run content validator
         print("🔍 Running content validator...")
         results = validate_content(scraped)
         
@@ -265,32 +266,35 @@ def research():
                 'warning': results['error'],
                 'total_scraped': results['total_analyzed'],
                 'passed_filters': results['passed_filters'],
-                'primary_source': primary_source,
                 'instagram_posts': instagram_count,
+                'twitter_posts': twitter_count,
                 'youtube_posts': youtube_count,
-                'mode': mode
+                'platforms_used': platforms
             }), 200
         
+        # Get viral posts for display (top 12 by engagement)
+        viral_posts = sorted(
+            [p for p in scraped if p.get('viral', False)],
+            key=lambda x: x.get('engagement_rate', 0),
+            reverse=True
+        )[:12]
+        
         # Add source information to results
-        results['primary_source'] = primary_source
         results['instagram_posts'] = instagram_count
+        results['twitter_posts'] = twitter_count
         results['youtube_posts'] = youtube_count
-        results['mode'] = mode
+        results['viral_posts'] = viral_posts
+        results['platforms_used'] = platforms
         
         print(f"✅ Research complete! Found {len(results['top_topics'])} trending topics")
-        print(f"📊 Primary source: {primary_source}")
-        print(f"🚀 Mode: {mode}")
+        print(f"📊 Posts: Instagram={instagram_count}, Twitter={twitter_count}, YouTube={youtube_count}")
         
         return jsonify(results)
         
     except Exception as e:
         print(f"❌ Research error: {str(e)}")
-        is_render = os.getenv('RENDER', '').lower() == 'true'
-        mode = 'instagram_only' if is_render else 'instagram_and_youtube'
         return jsonify({
-            'error': f'Research failed: {str(e)}. Please check your configuration and try again.',
-            'primary_source': 'error',
-            'mode': mode
+            'error': f'Research failed: {str(e)}. Please check your configuration and try again.'
         }), 500
 
 @app.route('/health')

@@ -12,6 +12,49 @@ const themeToggle = document.getElementById('themeToggle');
 // Store recommended topic globally
 let currentRecommendedTopic = '';
 
+// Platform selection state
+let selectedPlatforms = ['instagram', 'twitter']; // Default: Instagram + Twitter
+
+// Initialize platform selectors
+document.addEventListener('DOMContentLoaded', () => {
+    const platformBadges = document.querySelectorAll('.source-badge.selectable');
+    
+    platformBadges.forEach(badge => {
+        badge.addEventListener('click', () => {
+            const platform = badge.dataset.platform;
+            
+            if (badge.classList.contains('active')) {
+                // Deselect
+                badge.classList.remove('active');
+                selectedPlatforms = selectedPlatforms.filter(p => p !== platform);
+            } else {
+                // Select
+                badge.classList.add('active');
+                if (!selectedPlatforms.includes(platform)) {
+                    selectedPlatforms.push(platform);
+                }
+            }
+            
+            // Update research button text
+            updateResearchButtonText();
+        });
+    });
+    
+    // Set initial state
+    updateResearchButtonText();
+});
+
+function updateResearchButtonText() {
+    const btnText = document.querySelector('.research-btn .btn-text');
+    if (selectedPlatforms.length === 0) {
+        btnText.textContent = 'Select at least one platform';
+        researchBtn.disabled = true;
+    } else {
+        btnText.textContent = 'Research Trending Topics';
+        researchBtn.disabled = false;
+    }
+}
+
 // Theme Toggle
 themeToggle.addEventListener('click', () => {
     const body = document.body;
@@ -168,13 +211,13 @@ function showError(message) {
     }, 5000);
 }
 
-function copyToClipboard(elementId) {
+function copyToClipboard(elementId, btnElement) {
     const element = document.getElementById(elementId);
     const text = element.textContent;
     
     navigator.clipboard.writeText(text).then(() => {
         // Show success feedback
-        const btn = event.target.closest('.copy-btn');
+        const btn = btnElement || window.event.target.closest('.copy-btn');
         const originalHTML = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-check"></i>';
         btn.style.background = 'rgba(76, 175, 80, 0.3)';
@@ -208,6 +251,12 @@ function resetForm() {
 }
 
 async function researchTopics() {
+    // Check if at least one platform is selected
+    if (selectedPlatforms.length === 0) {
+        showError('Please select at least one platform to analyze');
+        return;
+    }
+    
     // Hide previous results and errors
     resultsSection.style.display = 'none';
     researchResults.style.display = 'none';
@@ -231,6 +280,7 @@ async function researchTopics() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+                platforms: selectedPlatforms,
                 keywords: [
                     'AI automation business',
                     'make money online',
@@ -281,36 +331,30 @@ function displayResearchResults(data) {
     document.getElementById('researchTimestamp').textContent = 
         `Analyzed at ${new Date().toLocaleString()}`;
     
-    // Display source information and mode
+    // Display source information
     const sourceInfo = document.getElementById('sourceInfo');
-    const primarySource = data.primary_source || 'unknown';
     const instagramCount = data.instagram_posts || 0;
+    const twitterCount = data.twitter_posts || 0;
     const youtubeCount = data.youtube_posts || 0;
-    const mode = data.mode || 'unknown';
+    const totalPosts = instagramCount + twitterCount + youtubeCount;
+    const platformsUsed = data.platforms_used || [];
     
     let sourceHTML = '<div class="source-stats">';
+    sourceHTML += `<div class="source-summary">Analyzed ${totalPosts} viral posts from ${platformsUsed.length} platform(s):</div>`;
     
-    // Display mode badge
-    if (mode === 'instagram_only') {
-        sourceHTML += `<span class="mode-badge render">🚀 Render Mode: Instagram Only</span>`;
-    } else if (mode === 'instagram_and_youtube') {
-        sourceHTML += `<span class="mode-badge local">💻 Local Mode: Instagram + YouTube</span>`;
+    if (platformsUsed.includes('instagram') && instagramCount > 0) {
+        sourceHTML += `<span class="source-badge-large instagram"><i class="fab fa-instagram"></i> ${instagramCount} Instagram Reels</span>`;
+    }
+    if (platformsUsed.includes('twitter') && twitterCount > 0) {
+        sourceHTML += `<span class="source-badge-large twitter"><i class="fab fa-twitter"></i> ${twitterCount} Tweets</span>`;
+    }
+    if (platformsUsed.includes('youtube') && youtubeCount > 0) {
+        sourceHTML += `<span class="source-badge-large youtube"><i class="fab fa-youtube"></i> ${youtubeCount} YouTube Shorts</span>`;
     }
     
-    // Display source info
-    if (primarySource === 'instagram') {
-        sourceHTML += `
-            <span class="source-badge-large primary">📸 Instagram Primary</span>
-            <span class="source-count">${instagramCount} Instagram posts</span>
-        `;
-        if (youtubeCount > 0) {
-            sourceHTML += `<span class="source-count secondary">${youtubeCount} YouTube posts (backup)</span>`;
-        }
-    } else if (primarySource === 'youtube') {
-        sourceHTML += `
-            <span class="source-badge-large backup">📺 YouTube Backup</span>
-            <span class="source-count">${youtubeCount} YouTube posts</span>
-        `;
+    // Show message if no posts from selected platforms
+    if (totalPosts === 0) {
+        sourceHTML += `<p class="no-posts">No posts found from selected platforms. Try different platforms or check your configuration.</p>`;
     }
     
     sourceHTML += '</div>';
@@ -366,6 +410,43 @@ function displayResearchResults(data) {
     
     topicsTable.innerHTML = tableHTML;
     
+    // Display viral posts with links
+    const postsGrid = document.getElementById('postsGrid');
+    let postsHTML = '';
+    
+    if (data.viral_posts && data.viral_posts.length > 0) {
+        data.viral_posts.slice(0, 12).forEach(post => {
+            const platformIcon = post.platform === 'instagram' ? 'fa-instagram' : 
+                                 post.platform === 'twitter' ? 'fa-twitter' : 'fa-youtube';
+            const platformColor = post.platform === 'instagram' ? '#E4405F' : 
+                                  post.platform === 'twitter' ? '#1DA1F2' : '#FF0000';
+            
+            postsHTML += `
+                <div class="post-card">
+                    <div class="post-header">
+                        <i class="fab ${platformIcon}" style="color: ${platformColor}"></i>
+                        <span class="post-username">@${post.username || 'unknown'}</span>
+                    </div>
+                    <div class="post-content">
+                        <p class="post-title">${post.title || post.caption || 'No caption'}</p>
+                    </div>
+                    <div class="post-stats">
+                        <span><i class="fas fa-eye"></i> ${formatNumber(post.views)}</span>
+                        <span><i class="fas fa-heart"></i> ${formatNumber(post.likes)}</span>
+                        <span><i class="fas fa-chart-line"></i> ${post.engagement_rate}%</span>
+                    </div>
+                    <a href="${post.url}" target="_blank" class="post-link">
+                        <i class="fas fa-external-link-alt"></i> View Post
+                    </a>
+                </div>
+            `;
+        });
+    } else {
+        postsHTML = '<p class="no-posts">No viral posts found from selected platforms</p>';
+    }
+    
+    postsGrid.innerHTML = postsHTML;
+    
     // Display stats
     document.getElementById('totalAnalyzed').textContent = data.total_analyzed;
     document.getElementById('passedFilters').textContent = data.passed_filters;
@@ -374,6 +455,15 @@ function displayResearchResults(data) {
     
     // Scroll to results
     researchResults.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function formatNumber(num) {
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
 }
 
 function useRecommendedTopic() {

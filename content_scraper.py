@@ -743,10 +743,24 @@ def run_scraper(keywords=None):
     Returns:
         Combined list with Instagram first, Twitter second, YouTube third
     """
+    return run_scraper_selective(['instagram', 'twitter', 'youtube'], keywords)
+
+
+def run_scraper_selective(platforms, keywords=None):
+    """
+    Selective scraper function - scrapes only from specified platforms
+    
+    Args:
+        platforms: List of platforms to scrape ['instagram', 'twitter', 'youtube']
+        keywords: List of keywords for YouTube search
+    
+    Returns:
+        Combined list of posts from selected platforms
+    """
     global scraped_data
     scraped_data = []
     
-    # Default keywords for YouTube backup
+    # Default keywords for YouTube
     if not keywords:
         keywords = [
             'web development India 2025',
@@ -763,47 +777,47 @@ def run_scraper(keywords=None):
     rapidapi_key = os.getenv('RAPIDAPI_KEY')
     
     print("\n" + "="*60)
-    if on_render:
-        print("🚀 CONTENT SCRAPING - RENDER DEPLOYMENT")
-    else:
-        print("🔍 CONTENT SCRAPING - LOCAL MODE")
-    print("="*60 + "\n")
-    
-    # PRIMARY: Scrape Instagram via RapidAPI
-    print("📸 PRIMARY SOURCE: Instagram via RapidAPI")
-    print("-" * 60)
-    instagram_results, ig_stats = scrape_instagram_rapidapi()
-    scraped_data.extend(instagram_results)
-    
-    instagram_count = len(instagram_results)
-    ig_viral_count = sum(1 for p in instagram_results if p.get('viral', False))
-    
-    # Print Instagram summary
-    print("\n" + "="*60)
-    print("📊 INSTAGRAM SUMMARY")
+    print("🔍 SELECTIVE CONTENT SCRAPING")
     print("="*60)
-    print(f"Total profiles: {ig_stats['total_profiles']}")
-    print(f"Successful: {ig_stats['successful_profiles']}")
-    print(f"Failed: {ig_stats['failed_profiles']}")
-    print(f"Total posts collected: {ig_stats['total_posts']}")
-    print(f"Viral posts: {ig_viral_count}")
-    print(f"API requests used: {ig_stats['api_requests']}")
+    print(f"Selected platforms: {', '.join(platforms).upper()}")
     print("="*60 + "\n")
     
-    # SECONDARY: Scrape Twitter/X via RapidAPI
+    instagram_count = 0
     twitter_count = 0
+    youtube_count = 0
+    
+    ig_stats = {}
     twitter_stats = {}
     
-    if rapidapi_key:
-        print("🐦 SECONDARY SOURCE: Twitter/X via RapidAPI")
+    # INSTAGRAM
+    if 'instagram' in platforms:
+        print("📸 SCRAPING: Instagram via RapidAPI")
+        print("-" * 60)
+        instagram_results, ig_stats = scrape_instagram_rapidapi()
+        scraped_data.extend(instagram_results)
+        instagram_count = len(instagram_results)
+        ig_viral_count = sum(1 for p in instagram_results if p.get('viral', False))
+        
+        print("\n" + "="*60)
+        print("📊 INSTAGRAM SUMMARY")
+        print("="*60)
+        print(f"Total profiles: {ig_stats.get('total_profiles', 0)}")
+        print(f"Successful: {ig_stats.get('successful_profiles', 0)}")
+        print(f"Failed: {ig_stats.get('failed_profiles', 0)}")
+        print(f"Total posts collected: {ig_stats.get('total_posts', 0)}")
+        print(f"Viral posts: {ig_viral_count}")
+        print(f"API requests used: {ig_stats.get('api_requests', 0)}")
+        print("="*60 + "\n")
+    
+    # TWITTER
+    if 'twitter' in platforms and rapidapi_key:
+        print("🐦 SCRAPING: Twitter/X via RapidAPI")
         print("-" * 60)
         twitter_results, twitter_stats = scrape_twitter_all(rapidapi_key)
         scraped_data.extend(twitter_results)
-        
         twitter_count = len(twitter_results)
         twitter_viral_count = sum(1 for p in twitter_results if p.get('viral', False))
         
-        # Print Twitter summary
         print("\n" + "="*60)
         print("📊 TWITTER SUMMARY")
         print("="*60)
@@ -813,46 +827,36 @@ def run_scraper(keywords=None):
         print(f"Viral tweets: {twitter_viral_count}")
         print(f"API requests used: {twitter_stats.get('api_requests', 0)}")
         print("="*60 + "\n")
-    else:
+    elif 'twitter' in platforms and not rapidapi_key:
         print("⚠️  RAPIDAPI_KEY not found - skipping Twitter\n")
     
-    # BACKUP: Only run YouTube if not on Render and Instagram + Twitter < 10 posts
-    youtube_count = 0
-    combined_count = instagram_count + twitter_count
-    
-    if on_render:
-        print("="*60)
-        print("Running on Render — YouTube skipped (no browser available).")
-        print("="*60 + "\n")
-    elif combined_count < 10:
-        print("="*60)
-        print(f"⚠️  Instagram + Twitter returned {combined_count} posts. Running YouTube as backup...")
-        print("="*60 + "\n")
-        
-        print("📺 BACKUP SOURCE: YouTube Shorts")
-        print("-" * 60)
-        youtube_results = scrape_youtube_shorts(keywords)
-        scraped_data.extend(youtube_results)
-        youtube_count = len(youtube_results)
-        
-        yt_viral = sum(1 for p in youtube_results if p.get('viral', False))
-        
-        print("="*60)
-        print("📊 YOUTUBE SUMMARY")
-        print("="*60)
-        print(f"Total videos collected: {youtube_count}")
-        print(f"Viral videos: {yt_viral}")
-        print("="*60 + "\n")
-    else:
-        print("="*60)
-        print(f"✅ Instagram + Twitter data sufficient ({combined_count} posts). Skipping YouTube.")
-        print("="*60 + "\n")
+    # YOUTUBE
+    if 'youtube' in platforms:
+        if on_render:
+            print("="*60)
+            print("Running on Render — YouTube skipped (no browser available).")
+            print("="*60 + "\n")
+        else:
+            print("📺 SCRAPING: YouTube Shorts")
+            print("-" * 60)
+            youtube_results = scrape_youtube_shorts(keywords)
+            scraped_data.extend(youtube_results)
+            youtube_count = len(youtube_results)
+            
+            yt_viral = sum(1 for p in youtube_results if p.get('viral', False))
+            
+            print("\n" + "="*60)
+            print("📊 YOUTUBE SUMMARY")
+            print("="*60)
+            print(f"Total videos collected: {youtube_count}")
+            print(f"Viral videos: {yt_viral}")
+            print("="*60 + "\n")
     
     # Final summary
     print("="*60)
     print("🎉 FINAL SUMMARY")
     print("="*60)
-    print(f"Mode: {'Render Deployment' if on_render else 'Local Mode'}")
+    print(f"Selected platforms: {', '.join(platforms)}")
     print(f"Total posts: {len(scraped_data)}")
     print(f"  📸 Instagram: {instagram_count} posts")
     print(f"  🐦 Twitter: {twitter_count} posts")
