@@ -296,9 +296,14 @@ def scrape_instagram_rapidapi(iguser_file='iguser.txt'):
                     stats['failed_profiles'] += 1
                     print(f"      ⚠️  No reels collected\n")
                 
-                # Sleep 2 seconds between profiles to avoid rate limiting
+                # Sleep 1 second between profiles to avoid rate limiting
                 if idx < len(usernames):
-                    time.sleep(2)
+                    time.sleep(1)
+                
+                # Clear memory periodically
+                if idx % 3 == 0:
+                    import gc
+                    gc.collect()
                         
             except Exception as e:
                 print(f"      ❌ Profile failed: {str(e)[:50]}\n")
@@ -335,14 +340,14 @@ def scrape_twitter_search(rapidapi_key):
         print(f"🐦 Searching Twitter by keywords...")
         print(f"   (Top 5 tweets per query, last 30 days)\n")
         
-        for query in TWITTER_SEARCH_QUERIES:
+        for idx, query in enumerate(TWITTER_SEARCH_QUERIES, 1):
             try:
                 params = {
                     "query": query,
                     "search_type": "Top"
                 }
                 
-                response = requests.get(url, headers=headers, params=params, timeout=15)
+                response = requests.get(url, headers=headers, params=params, timeout=10)
                 api_requests += 1
                 
                 if response.status_code == 429:
@@ -351,7 +356,7 @@ def scrape_twitter_search(rapidapi_key):
                 
                 if response.status_code != 200:
                     print(f"   ❌ '{query}': API error ({response.status_code})")
-                    time.sleep(1)
+                    time.sleep(0.5)
                     continue
                 
                 response_data = response.json()
@@ -401,12 +406,17 @@ def scrape_twitter_search(rapidapi_key):
                 
                 print(f"   ✅ '{query}': {tweet_count} tweets")
                 
-                # 1 second delay between searches
-                time.sleep(1)
+                # Shorter delay and memory cleanup
+                time.sleep(0.5)
+                
+                # Clear memory every 2 queries
+                if idx % 2 == 0:
+                    import gc
+                    gc.collect()
                 
             except Exception as e:
                 print(f"   ❌ '{query}': Failed ({str(e)[:50]})")
-                time.sleep(1)
+                time.sleep(0.5)
                 continue
         
     except Exception as e:
@@ -519,8 +529,12 @@ def scrape_twitter_users(rapidapi_key, twitter_handles_file='twitter_handles.txt
                 
                 print(f"   ✅ @{handle}: {tweet_count} tweets")
                 
-                # 1 second delay between users
-                time.sleep(1)
+                # Shorter delay and memory cleanup
+                time.sleep(0.5)
+                
+                # Clear memory periodically
+                import gc
+                gc.collect()
                 
             except Exception as e:
                 print(f"   ❌ @{handle}: Failed ({str(e)[:50]})")

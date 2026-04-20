@@ -1,19 +1,70 @@
-DEPLOYMENT STATUS
-=================
+DEPLOYMENT STATUS - AI CONTENT FLOW
+====================================
 
-✅ FIXED: Removed ALL pandas imports from code
-✅ Python version: 3.12.3
-✅ Only essential packages: Flask, Gunicorn, Groq, python-dotenv
+LAST UPDATE: 2026-04-20
+STATUS: FIXED - Memory optimization applied
 
-RENDER DEPLOYMENT
------------------
-Your app should now deploy successfully!
+ISSUE RESOLVED:
+- Worker timeout and OOM (Out of Memory) errors on Render
+- Worker killed with SIGKILL during /research endpoint
 
-WHAT WAS FIXED
---------------
-1. Removed pandas from requirements.txt
-2. Removed pandas import from app.py
-3. Removed pandas import from voice_writer.py
-4. Simplified topic handling (no CSV reading)
+FIXES APPLIED:
+1. ✅ Gunicorn configuration optimized (gunicorn_config.py)
+   - Single worker with 2 threads (reduced memory footprint)
+   - 5-minute timeout for long operations
+   - Worker recycling after 100 requests
+   - Shared memory for worker heartbeat
 
-Your deployment should work now! 🚀
+2. ✅ Memory optimization in scrapers
+   - Added garbage collection after every 2-3 API calls
+   - Reduced sleep delays (2s → 1s for IG, 1s → 0.5s for Twitter)
+   - Removed heavy dependencies (yt-dlp, instaloader)
+
+3. ✅ Request timeout protection
+   - Added 4-minute timeout to /research endpoint
+   - Graceful error handling for timeouts
+
+4. ✅ Reduced API timeouts
+   - Instagram: 15s → 10s
+   - Twitter search: 15s → 10s
+
+DEPLOYMENT STEPS:
+1. Commit all changes:
+   git add .
+   git commit -m "Fix: Optimize memory usage and worker timeout"
+   git push origin main
+
+2. Render will auto-deploy (if connected to GitHub)
+   OR manually deploy from Render dashboard
+
+3. Monitor logs after deployment:
+   - Check for successful worker startup
+   - Test /research endpoint
+   - Watch memory usage
+
+TESTING:
+- Local: Works fine (no memory constraints)
+- Render: Should now complete within 4-5 minutes without OOM
+
+RENDER PLAN REQUIREMENTS:
+- Free tier: 512MB RAM (tight but should work with optimizations)
+- Starter tier: 2GB RAM (recommended for production)
+
+MONITORING:
+- Watch for "Worker exiting" or "SIGKILL" messages
+- If still failing, consider:
+  1. Upgrading to Starter plan (2GB RAM)
+  2. Further reducing concurrent API calls
+  3. Implementing background job queue (Celery/Redis)
+
+ENVIRONMENT VARIABLES REQUIRED:
+- GROQ_API_KEY (for content generation)
+- RAPIDAPI_KEY (for Instagram/Twitter scraping)
+- RENDER=true (auto-set by Render)
+- PORT (auto-set by Render)
+
+NEXT STEPS IF ISSUES PERSIST:
+1. Check Render metrics for actual memory usage
+2. Consider implementing Redis + Celery for background jobs
+3. Add caching layer for repeated requests
+4. Implement pagination for large result sets

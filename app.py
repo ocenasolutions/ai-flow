@@ -206,6 +206,11 @@ def research():
     Research trending topics endpoint
     Runs content scraper and validator based on selected platforms
     """
+    import signal
+    
+    def timeout_handler(signum, frame):
+        raise TimeoutError("Research operation timed out")
+    
     try:
         data = request.json
         
@@ -222,16 +227,11 @@ def research():
             }), 400
         
         keywords = data.get('keywords', [
-            'web development India 2025',
-            'app development for business',
-            'AI automation for entrepreneurs',
-            'tech consulting India',
-            'how to build a website business',
-            'AI tools for small business India',
-            'freelance web developer India',
-            'software agency growth',
-            'Claude Code tutorial',
-            'make money with tech skills India'
+            'AI programming tutorial',
+            'machine learning 2025',
+            'software engineering tips',
+            'web development nextjs',
+            'AI tools developers'
         ])
         
         # Ensure keywords is a list
@@ -242,8 +242,16 @@ def research():
         print(f"   Platforms: {', '.join(platforms)}")
         print(f"   Keywords: {len(keywords)} keywords")
         
-        # Run scraper with selected platforms
-        scraped = run_scraper_selective(platforms, keywords)
+        # Set timeout for scraping (4 minutes max)
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(240)
+        
+        try:
+            # Run scraper with selected platforms
+            scraped = run_scraper_selective(platforms, keywords)
+        finally:
+            # Cancel timeout
+            signal.alarm(0)
         
         if not scraped:
             return jsonify({
@@ -289,7 +297,17 @@ def research():
         print(f"✅ Research complete! Found {len(results['top_topics'])} trending topics")
         print(f"📊 Posts: Instagram={instagram_count}, Twitter={twitter_count}, YouTube={youtube_count}")
         
+        # Clear memory
+        import gc
+        gc.collect()
+        
         return jsonify(results)
+    
+    except TimeoutError:
+        print(f"⏱️  Research timed out after 4 minutes")
+        return jsonify({
+            'error': 'Research operation timed out. Try selecting fewer platforms or reducing keywords.'
+        }), 504
         
     except Exception as e:
         print(f"❌ Research error: {str(e)}")
@@ -299,8 +317,23 @@ def research():
 
 @app.route('/health')
 def health():
-    """Health check endpoint"""
-    return jsonify({'status': 'ok'})
+    """Health check endpoint with memory info"""
+    import psutil
+    import os
+    
+    try:
+        process = psutil.Process(os.getpid())
+        memory_info = process.memory_info()
+        memory_mb = memory_info.rss / 1024 / 1024
+        
+        return jsonify({
+            'status': 'ok',
+            'memory_mb': round(memory_mb, 2),
+            'pid': os.getpid()
+        })
+    except:
+        # Fallback if psutil not available
+        return jsonify({'status': 'ok'})
 
 if __name__ == '__main__':
     # Get port from environment variable (for deployment) or use 5000
