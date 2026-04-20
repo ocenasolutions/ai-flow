@@ -270,8 +270,9 @@ async function researchTopics() {
     // Reset all cards
     resetCards();
     
-    // Animate cards sequentially
-    animateCards();
+    // Start animation loop (will continue until API responds)
+    let animationRunning = true;
+    const animationPromise = loopCardAnimation(() => animationRunning);
     
     try {
         const response = await fetch('/research', {
@@ -291,6 +292,9 @@ async function researchTopics() {
             })
         });
         
+        // Stop animation loop
+        animationRunning = false;
+        
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.error || 'Research failed');
@@ -298,19 +302,28 @@ async function researchTopics() {
         
         const data = await response.json();
         
-        // Wait for all cards to complete
-        await sleep(8000);
+        // Wait a moment for final card animation to complete
+        await sleep(2000);
         
         // Display research results
         displayResearchResults(data);
         
     } catch (error) {
+        animationRunning = false;
         showError('Research failed: ' + error.message);
         console.error('Error:', error);
         loadingProgress.style.display = 'none';
     } finally {
         researchBtn.disabled = false;
         generateBtn.disabled = false;
+    }
+}
+
+async function loopCardAnimation(isRunning) {
+    while (isRunning()) {
+        await animateCards();
+        // Small pause before restarting loop
+        await sleep(500);
     }
 }
 
